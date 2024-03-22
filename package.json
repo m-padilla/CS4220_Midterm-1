@@ -1,0 +1,32 @@
+{
+  "name": "cs4220_midterm",
+  "version": "1.0.0",
+  "description": "a  CLI application interfacing with a web API to query data",
+  "main": "cli.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
+    "yargs": "17.7.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DrkWithT/CS4220_Midterm.git"
+  },
+  "author": "Marco Padilla",
+  "contributors": [
+    "Christopher Gonzales",
+    "Derek Tan",
+    "Runyi Yang",
+    "Evan Peraza",
+    "Tailsy Bobadilla"
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DrkWithT/CS4220_Midterm/issues"
+  },
+  "homepage": "https://github.com/DrkWithT/CS4220_Midterm#readme"
+}
