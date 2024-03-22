@@ -2,7 +2,7 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
-import {cookRecipe} from './app.js';
+import {cookRecipe, randomRecipe} from './app.js';
 
 yargs(hideBin(process.argv))
     // $0 expands the file name
@@ -35,12 +35,21 @@ yargs(hideBin(process.argv))
             else if (args.type === 'firstLetter') {
                 cookRecipe('firstLetter', args.variable);
             }
-            else if (args.type === 'id') {
+            else{
                 cookRecipe('id', args.variable);
             }
-            else {
-                console.log(`${args.game} is not ready. :(`);
-            }
+        }
+    )
+    .command(
+        // command name with argument
+        'random',
+        // description
+        'get a random meal recipe',
+        // builder function to add a positional argument and option
+        () => {},
+        // handler function
+        () => {
+            randomRecipe();
         }
     )
     .help().argv;

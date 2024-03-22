@@ -36,17 +36,38 @@ export async function cookRecipe(type, variable) {
         // get a recipe
         if (type === 'name') {
             const mealQuery = await api.searchByName(variable);
+            if (mealQuery.meals === null){
+                throw new Error(`Sorry we don't have recipe names ${variable}.`);
+            }
             _prettyPrint(mealQuery.meals);
+
         } 
         else if (type === 'firstLetter') {
             const mealQuery = await api.searchByFirstLetter(variable);
+            if (mealQuery.meals === null){
+                throw new Error(`Sorry we don't have recipe with first letter ${variable}.`);
+            }
             _prettyPrint(mealQuery.meals);
         }
         else  {
             const mealQuery = await api.searchById(variable);
+            if (mealQuery.meals === null){
+                throw new Error(`Sorry we don't have recipe with id ${variable}.`);
+            }
             _prettyPrint(mealQuery.meals);
         }
     } catch (error) {
-        console.log(error);
+        console.log(error.message);
+    }
+}
+
+export async function randomRecipe() {
+    try {
+        // get a random recipe
+        const mealQuery = await api.randomSearch();
+        _prettyPrint(mealQuery.meals);
+
+    } catch (error) {
+        console.log(error.message);
     }
 }

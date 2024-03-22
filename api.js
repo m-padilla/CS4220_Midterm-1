@@ -28,10 +28,23 @@ export async function searchById(mealId) {
         console.error(error);
     }
 }
+
 // www.themealdb.com/api/json/v1/1/search.php?f=a
 export async function searchByFirstLetter(mealFL) {
     try {
         const apiURL = `${base}/search.php?f=${mealFL}`;
+        const response = await axios.get(apiURL);
+        
+        return response.data;
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// www.themealdb.com/api/json/v1/1/random.php
+export async function randomSearch() {
+    try {
+        const apiURL = `${base}/random.php`;
         const response = await axios.get(apiURL);
         
         return response.data;
