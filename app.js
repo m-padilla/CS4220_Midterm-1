@@ -1,8 +1,39 @@
-// the file for our application logic (aka logic to play 5 card poker)
+/**
+ * @file app.js
+ * @description Contains our application logic (aka logic to use food API, etc.)
+ */
 
 import * as api from './api.js';
+import * as db from './db.js';
 
-// prints the meal information in a user friendly manner.
+/**
+ * @description Pretty prints earlier food API searches saved in the mock database.
+ */
+export async function displaySearchHistory() {
+    /** @type {{search: string, resultCount: number}[]} */
+    const history = await db.find('search_history');
+
+    console.log('Search History:')
+    console.log('= = = = = = = = = = = = = = = = = = = = = =\n');
+
+    if (history.length < 1) {
+        console.log('No earlier searches found.');
+        return;
+    }
+
+    for (let historyIdx = 0; historyIdx < history.length; historyIdx++) {
+        const entry = history[historyIdx];
+        console.log(`${historyIdx + 1}) "${entry.search}" with ${entry.resultCount} results`);
+    }
+
+    console.log('= = = = = = = = = = = = = = = = = = = = = =\n');
+}
+
+/**
+ * @description prints the meal information in a user friendly manner.
+ * @param {{strMeal: string, idMeal: string, strInstructions: string}[]} meals
+ * @returns {void}
+**/
 function _prettyPrint(meals) {
     /* for each meal in meals...
        display the name of the meal
