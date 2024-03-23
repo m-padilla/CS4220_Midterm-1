@@ -2,7 +2,7 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
-import {cookRecipe, randomRecipe} from './app.js';
+import {displaySearchHistory, cookRecipe, randomRecipe} from './app.js';
 
 yargs(hideBin(process.argv))
     // $0 expands the file name
@@ -50,6 +50,14 @@ yargs(hideBin(process.argv))
         // handler function
         () => {
             randomRecipe();
+        }
+    )
+    .command(
+        'history',
+        'lists previous searches',
+        () => {}, // no positional arguments needed
+        () => {
+            displaySearchHistory();
         }
     )
     .help().argv;
