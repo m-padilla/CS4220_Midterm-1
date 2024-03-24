@@ -25,6 +25,12 @@ yargs(hideBin(process.argv))
                 .positional('variable', {
                     describe: 'searching key words',
                     type: 'string',
+                })
+                .option('cache', {
+                    alias: 'c',
+                    describe: 'Return cached results when available',
+                    type: 'boolean',
+                    default: false
                 });
         },
         // handler function
