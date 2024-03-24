@@ -37,7 +37,11 @@ const _read = async (collection) => {
  */
 export const create = async (collection, data) => {
     try {
-        const records = await _read(collection);
+        let records = await _read(collection);
+        // Check if records is an array, if not initialize it as an empty array
+        if (!Array.isArray(records)) {
+            records = [];
+        }
         records.push(data);
 
         const fullPath = path.resolve(dbDirectory, `${collection}.json`);
