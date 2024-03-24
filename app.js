@@ -62,35 +62,52 @@ function _prettyPrint(meals) {
     console.log('= = = = = = = = = = = = = = = = = = = = = =');
 }
 
-export async function cookRecipe(type, variable) {
+export async function cookRecipe(type, variable, cache = false) {
     try {
-        // get a recipe
-        if (type === 'name') {
-            const mealQuery = await api.searchByName(variable);
-            if (mealQuery.meals === null){
-                throw new Error(`Sorry we don't have recipe names ${variable}.`);
-            }
-            _prettyPrint(mealQuery.meals);
+        let mealQuery;
 
-        } 
-        else if (type === 'firstLetter') {
-            const mealQuery = await api.searchByFirstLetter(variable);
-            if (mealQuery.meals === null){
-                throw new Error(`Sorry we don't have recipe with first letter ${variable}.`);
+        // Check if cache option is enabled
+        if (cache) {
+            // Attempt to find the selected item in the search cache
+            mealQuery = await db.find('search_cache', variable);
+
+            if (!mealQuery) {
+                // If not found in the search cache, get the selected item from the API
+                mealQuery = await fetchRecipeFromAPI(type, variable);
+
+                // Save an entry in search_cache.json
+                await db.create('search_cache', { key: variable, value: mealQuery });
             }
-            _prettyPrint(mealQuery.meals);
+        } else {
+            // If cache option is false, get the selected item from the API
+            mealQuery = await fetchRecipeFromAPI(type, variable);
+
+            // Save an entry in search_cache.json
+            await db.create('search_cache', { key: variable, value: mealQuery });
         }
-        else  {
-            const mealQuery = await api.searchById(variable);
-            if (mealQuery.meals === null){
-                throw new Error(`Sorry we don't have recipe with id ${variable}.`);
-            }
-            _prettyPrint(mealQuery.meals);
+
+        // Print the retrieved meal information
+        if (mealQuery.meals === null) {
+            throw new Error(`Sorry, we don't have a recipe for ${variable}.`);
         }
+        _prettyPrint(mealQuery.meals);
     } catch (error) {
         console.log(error.message);
     }
 }
+// Gets the recipe from api using cache
+async function fetchRecipeFromAPI(type, variable) {
+    let mealQuery;
+    if (type === 'name') {
+        mealQuery = await api.searchByName(variable);
+    } else if (type === 'firstLetter') {
+        mealQuery = await api.searchByFirstLetter(variable);
+    } else {
+        mealQuery = await api.searchById(variable);
+    }
+    return mealQuery;
+}
+
 
 export async function randomRecipe() {
     try {
