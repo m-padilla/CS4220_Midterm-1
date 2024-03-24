@@ -2,7 +2,7 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
-import {cookRecipe, randomRecipe} from './app.js';
+import {cookRecipe, previousRecipes} from './app.js';
 
 yargs(hideBin(process.argv))
     // $0 expands the file name
@@ -23,7 +23,7 @@ yargs(hideBin(process.argv))
                     choices: ['name', 'firstLetter' , 'id']
                 })
                 .positional('variable', {
-                    describe: 'searching key words',
+                    describe: 'searching keyword',
                     type: 'string',
                 });
         },
@@ -39,17 +39,12 @@ yargs(hideBin(process.argv))
                 cookRecipe('id', args.variable);
             }
         }
-    )
-    .command(
-        // command name with argument
-        'random',
-        // description
-        'get a random meal recipe',
-        // builder function to add a positional argument and option
-        () => {},
-        // handler function
+    ).command(
+        'previousRecipes',
+        'view the previous recipes', 
+        () => {}, 
         () => {
-            randomRecipe();
+            previousRecipes();
         }
-    )
-    .help().argv;
+
+    ).help().argv;

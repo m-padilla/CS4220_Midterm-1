@@ -1,6 +1,9 @@
 // the file for our application logic (aka logic to play 5 card poker)
 
 import * as api from './api.js';
+import { select } from '@inquirer/prompts';
+import * as db from "./db.js"
+
 
 // prints the meal information in a user friendly manner.
 function _prettyPrint(meals) {
@@ -31,6 +34,19 @@ function _prettyPrint(meals) {
     console.log('= = = = = = = = = = = = = = = = = = = = = =');
 }
 
+async function _recipePrompt ( meals ) {
+    const displayMeals = meals.map((meal) => {
+        return{name : `${meal.strMeal}`, value: meal.idMeal};
+    });
+
+    return await select({
+        message: 'Select a meal to view',
+        choices: displayMeals
+    });
+
+};
+
+
 export async function cookRecipe(type, variable) {
     try {
         // get a recipe
@@ -39,15 +55,23 @@ export async function cookRecipe(type, variable) {
             if (mealQuery.meals === null){
                 throw new Error(`Sorry we don't have recipe names ${variable}.`);
             }
-            _prettyPrint(mealQuery.meals);
+            const selectedMeal = await _recipePrompt(mealQuery.meals);
+            const displaySelectedMeal = await api.searchById(selectedMeal);
+            _prettyPrint(displaySelectedMeal.meals);
+
+           historyEntry(variable, mealQuery.meals.length);
 
         } 
-        else if (type === 'firstLetter') {
+        if (type === 'firstLetter') {
             const mealQuery = await api.searchByFirstLetter(variable);
             if (mealQuery.meals === null){
                 throw new Error(`Sorry we don't have recipe with first letter ${variable}.`);
             }
-            _prettyPrint(mealQuery.meals);
+            const selectedMeal = await _recipePrompt(mealQuery.meals);
+            const displaySelectedMeal = await api.searchById(selectedMeal);
+            _prettyPrint(displaySelectedMeal.meals);
+
+            historyEntry(variable, mealQuery.meals.length);
         }
         else  {
             const mealQuery = await api.searchById(variable);
@@ -55,19 +79,29 @@ export async function cookRecipe(type, variable) {
                 throw new Error(`Sorry we don't have recipe with id ${variable}.`);
             }
             _prettyPrint(mealQuery.meals);
+
+            historyEntry(variable, mealQuery.meals.length);
         }
+        
     } catch (error) {
         console.log(error.message);
     }
 }
 
-export async function randomRecipe() {
-    try {
-        // get a random recipe
-        const mealQuery = await api.randomSearch();
-        _prettyPrint(mealQuery.meals);
+async function historyEntry( mealEntry, numOfMeal ){
+    const entry = {
+        id: 'whatever',
+        search: mealEntry,
+        resultCount: numOfMeal
+    };
+    
+    await db.create('search_history', entry);
+}
 
-    } catch (error) {
-        console.log(error.message);
-    }
+export async function previousRecipes (){
+    const recipes = await db.find('search_history');
+    const cookedRecipes = recipes.pop();
+
+    console.log('Previously Visited Recipes:');
+    console.log(cookedRecipes);
 }
