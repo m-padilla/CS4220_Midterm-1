@@ -1,7 +1,6 @@
 // the file to build the command line interface
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-
 import {displaySearchHistory, cookRecipe, randomRecipe} from './app.js';
 
 yargs(hideBin(process.argv))
@@ -23,7 +22,7 @@ yargs(hideBin(process.argv))
                     choices: ['name', 'firstLetter' , 'id']
                 })
                 .positional('variable', {
-                    describe: 'searching key words',
+                    describe: 'searching keyword',
                     type: 'string',
                 })
                 .option('cache', {
@@ -45,25 +44,11 @@ yargs(hideBin(process.argv))
                 cookRecipe('id', args.variable);
             }
         }
-    )
-    .command(
-        // command name with argument
-        'random',
-        // description
-        'get a random meal recipe',
-        // builder function to add a positional argument and option
-        () => {},
-        // handler function
-        () => {
-            randomRecipe();
-        }
-    )
-    .command(
+    ).command(
         'history',
         'lists previous searches',
         () => {}, // no positional arguments needed
         () => {
             displaySearchHistory();
         }
-    )
-    .help().argv;
+    ).help().argv;

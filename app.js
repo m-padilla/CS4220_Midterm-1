@@ -4,7 +4,9 @@
  */
 
 import * as api from './api.js';
-import * as db from './db.js';
+import { select } from '@inquirer/prompts';
+import * as db from "./db.js"
+
 
 /**
  * @description Pretty prints earlier food API searches saved in the mock database.
@@ -62,6 +64,19 @@ function _prettyPrint(meals) {
     console.log('= = = = = = = = = = = = = = = = = = = = = =');
 }
 
+
+async function _recipePrompt ( meals ) {
+    const displayMeals = meals.map((meal) => {
+        return{name : `${meal.strMeal}`, value: meal.idMeal};
+    });
+
+    return await select({
+        message: 'Select a meal to view',
+        choices: displayMeals
+    });
+
+};
+
 export async function cookRecipe(type, variable, cache = false) {
     try {
         let mealQuery;
@@ -91,6 +106,7 @@ export async function cookRecipe(type, variable, cache = false) {
             throw new Error(`Sorry, we don't have a recipe for ${variable}.`);
         }
         _prettyPrint(mealQuery.meals);
+      
     } catch (error) {
         console.log(error.message);
     }
@@ -105,17 +121,13 @@ async function fetchRecipeFromAPI(type, variable) {
     } else {
         mealQuery = await api.searchById(variable);
     }
+    await db.create(
+      'search_history',
+      {search: variable.charAt(0).toUpperCase() + variable.slice(1).toLowerCase(), 
+      resultCount: mealQuery.meals.length}
+    );
+    const selectedMeal = await _recipePrompt(mealQuery.meals);
+    mealQuery = await api.searchById(selectedMeal);
+  
     return mealQuery;
-}
-
-
-export async function randomRecipe() {
-    try {
-        // get a random recipe
-        const mealQuery = await api.randomSearch();
-        _prettyPrint(mealQuery.meals);
-
-    } catch (error) {
-        console.log(error.message);
-    }
 }
