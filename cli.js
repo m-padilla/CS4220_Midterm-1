@@ -45,6 +45,17 @@ yargs(hideBin(process.argv))
             }
         }
     ).command(
+        // command name with argument
+        'random',
+        // description
+        'get a random meal recipe',
+        // builder function to add a positional argument and option
+        () => {},
+        // handler function
+        () => {
+            randomRecipe();
+        }
+    ).command(
         'history',
         'lists previous searches',
         () => {}, // no positional arguments needed
