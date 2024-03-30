@@ -5,8 +5,7 @@
 
 import * as api from './api.js';
 import { select } from '@inquirer/prompts';
-import * as db from "./db.js"
-
+import * as db from './db.js';
 
 /**
  * @description Pretty prints earlier food API searches saved in the mock database.
@@ -15,7 +14,7 @@ export async function displaySearchHistory() {
     /** @type {{search: string, resultCount: number}[]} */
     const history = await db.find('search_history');
 
-    console.log('Search History:')
+    console.log('Search History:');
     console.log('= = = = = = = = = = = = = = = = = = = = = =\n');
 
     if (history.length < 1) {
@@ -53,9 +52,12 @@ function _prettyPrint(meals) {
         console.log('Ingredient:');
         for (let i = 1; i < 20 + 1; i++) {
             if (meal[`strIngredient${i}`]) {
-                console.log(`${meal[`strIngredient${i}`].padEnd(20)}\t\t${meal[`strMeasure${i}`]}`);
-            } 
-            else {
+                console.log(
+                    `${meal[`strIngredient${i}`].padEnd(20)}\t\t${
+                        meal[`strMeasure${i}`]
+                    }`
+                );
+            } else {
                 break;
             }
         }
@@ -65,16 +67,83 @@ function _prettyPrint(meals) {
 }
 
 
-async function _recipePrompt ( meals ) {
+async function _recipePrompt(meals) {
     const displayMeals = meals.map((meal) => {
-        return{name : `${meal.strMeal}`, value: meal.idMeal};
+        return { name: `${meal.strMeal}`, value: meal.idMeal };
     });
 
     return await select({
         message: 'Select a meal to view',
         choices: displayMeals
     });
+}
 
+export async function cookRecipe(type, variable, cache) {
+    try {
+        let mealQuery;
+        
+        //search the recipe and save data in the search_history.json
+        mealQuery = await fetchRecipeFromAPI(type, variable);
+        
+        //Prompts the user to select an item from the search results.
+        const selectedMealId = await _recipePrompt(mealQuery.meals);
+        
+        // Check if cache option is enabled
+        if (cache) {
+            // Attempt to find the selected item in the search cache
+            mealQuery = await db.find('search_cache', selectedMealId);
+
+            if (!mealQuery) {
+                // If not found in the search cache, get the selected item from the API
+                mealQuery = await api.searchById(selectedMealId);
+
+                // Save an entry in search_cache.json
+                await db.create('search_cache', {
+                    id: selectedMealId,
+                    value: mealQuery
+                });
+            } else {
+                //get value(recipe) from cache
+                mealQuery = mealQuery.value;
+            }
+        } else {
+            // If cache option is false, get the selected item from the API
+            mealQuery = await api.searchById(selectedMealId);
+
+            // Save an entry in search_cache.json
+            await db.create('search_cache', {
+                id: selectedMealId,
+                value: mealQuery
+            });
+        }
+        // Print the retrieved meal information
+        _prettyPrint(mealQuery.meals);
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+// Gets the recipe from api using cache and save data in the search_history.json
+async function fetchRecipeFromAPI(type, variable) {
+    try {
+        let mealQuery;
+        if (type === 'name') {
+            mealQuery = await api.searchByName(variable);
+        } else if (type === 'firstLetter') {
+            mealQuery = await api.searchByFirstLetter(variable);
+        } else {
+            mealQuery = await api.searchById(variable);
+        }
+        //throw error if don't have recipe
+        if (mealQuery.meals === null) {
+            throw new Error(`Sorry, we don't have a recipe for ${variable}.`);
+        }
+        
+        await db.create('search_history', {
+            search: variable.charAt(0).toUpperCase() + variable.slice(1).toLowerCase(),
+            resultCount: mealQuery.meals.length
+        });
+
+        return mealQuery;
 };
 
 export async function cookRecipe(type, variable, cache = false) {
@@ -106,7 +175,7 @@ export async function cookRecipe(type, variable, cache = false) {
             throw new Error(`Sorry, we don't have a recipe for ${variable}.`);
         }
         _prettyPrint(mealQuery.meals);
-      
+
     } catch (error) {
         console.log(error.message);
     }

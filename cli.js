@@ -35,13 +35,13 @@ yargs(hideBin(process.argv))
         // handler function
         (args) => {
             if (args.type === 'name') {
-                cookRecipe('name', args.variable);
+                cookRecipe('name', args.variable, args.cache);
             } 
             else if (args.type === 'firstLetter') {
-                cookRecipe('firstLetter', args.variable);
+                cookRecipe('firstLetter', args.variable, args.cache);
             }
             else{
-                cookRecipe('id', args.variable);
+                cookRecipe('id', args.variable, args.cache);
             }
         }
     ).command(
