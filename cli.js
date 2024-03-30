@@ -1,8 +1,7 @@
 // the file to build the command line interface
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-
-import {cookRecipe, randomRecipe} from './app.js';
+import {displaySearchHistory, cookRecipe} from './app.js';
 
 yargs(hideBin(process.argv))
     // $0 expands the file name
@@ -23,33 +22,33 @@ yargs(hideBin(process.argv))
                     choices: ['name', 'firstLetter' , 'id']
                 })
                 .positional('variable', {
-                    describe: 'searching key words',
+                    describe: 'searching keyword',
                     type: 'string',
+                })
+                .option('cache', {
+                    alias: 'c',
+                    describe: 'Return cached results when available',
+                    type: 'boolean',
+                    default: false
                 });
         },
         // handler function
         (args) => {
             if (args.type === 'name') {
-                cookRecipe('name', args.variable);
+                cookRecipe('name', args.variable, args.cache);
             } 
             else if (args.type === 'firstLetter') {
-                cookRecipe('firstLetter', args.variable);
+                cookRecipe('firstLetter', args.variable, args.cache);
             }
             else{
-                cookRecipe('id', args.variable);
+                cookRecipe('id', args.variable, args.cache);
             }
         }
-    )
-    .command(
-        // command name with argument
-        'random',
-        // description
-        'get a random meal recipe',
-        // builder function to add a positional argument and option
-        () => {},
-        // handler function
+    ).command(
+        'history',
+        'lists previous searches',
+        () => {}, // no positional arguments needed
         () => {
-            randomRecipe();
+            displaySearchHistory();
         }
-    )
-    .help().argv;
+    ).help().argv;

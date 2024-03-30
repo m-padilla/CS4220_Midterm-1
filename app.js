@@ -1,8 +1,44 @@
-// the file for our application logic (aka logic to play 5 card poker)
+/**
+ * @file app.js
+ * @description Contains our application logic (aka logic to use food API, etc.)
+ */
 
 import * as api from './api.js';
+import { select } from '@inquirer/prompts';
+import * as db from './db.js';
 
-// prints the meal information in a user friendly manner.
+/**
+ * @description Pretty prints earlier food API searches saved in the mock database.
+ */
+export async function displaySearchHistory() {
+    /** @type {{search: string, resultCount: number}[]} */
+    const history = await db.find('search_history');
+
+    console.log('Search History:');
+    console.log('= = = = = = = = = = = = = = = = = = = = = =\n');
+
+    if (history.length < 1) {
+        console.log('No earlier searches found.');
+        return;
+    }
+
+    for (let historyIdx = 0; historyIdx < history.length; historyIdx++) {
+        const entry = history[historyIdx];
+        console.log(
+            `${historyIdx + 1}) "${entry.search}" with ${
+                entry.resultCount
+            } results`
+        );
+    }
+
+    console.log('= = = = = = = = = = = = = = = = = = = = = =\n');
+}
+
+/**
+ * @description prints the meal information in a user friendly manner.
+ * @param {{strMeal: string, idMeal: string, strInstructions: string}[]} meals
+ * @returns {void}
+ **/
 function _prettyPrint(meals) {
     /* for each meal in meals...
        display the name of the meal
@@ -20,9 +56,12 @@ function _prettyPrint(meals) {
         console.log('Ingredient:');
         for (let i = 1; i < 20 + 1; i++) {
             if (meal[`strIngredient${i}`]) {
-                console.log(`${meal[`strIngredient${i}`].padEnd(20)}\t\t${meal[`strMeasure${i}`]}`);
-            } 
-            else {
+                console.log(
+                    `${meal[`strIngredient${i}`].padEnd(20)}\t\t${
+                        meal[`strMeasure${i}`]
+                    }`
+                );
+            } else {
                 break;
             }
         }
@@ -31,42 +70,83 @@ function _prettyPrint(meals) {
     console.log('= = = = = = = = = = = = = = = = = = = = = =');
 }
 
-export async function cookRecipe(type, variable) {
-    try {
-        // get a recipe
-        if (type === 'name') {
-            const mealQuery = await api.searchByName(variable);
-            if (mealQuery.meals === null){
-                throw new Error(`Sorry we don't have recipe names ${variable}.`);
-            }
-            _prettyPrint(mealQuery.meals);
+async function _recipePrompt(meals) {
+    const displayMeals = meals.map((meal) => {
+        return { name: `${meal.strMeal}`, value: meal.idMeal };
+    });
 
-        } 
-        else if (type === 'firstLetter') {
-            const mealQuery = await api.searchByFirstLetter(variable);
-            if (mealQuery.meals === null){
-                throw new Error(`Sorry we don't have recipe with first letter ${variable}.`);
+    return await select({
+        message: 'Select a meal to view',
+        choices: displayMeals
+    });
+}
+
+export async function cookRecipe(type, variable, cache) {
+    try {
+        let mealQuery;
+        
+        //search the recipe and save data in the search_history.json
+        mealQuery = await fetchRecipeFromAPI(type, variable);
+        
+        //Prompts the user to select an item from the search results.
+        const selectedMealId = await _recipePrompt(mealQuery.meals);
+        
+        // Check if cache option is enabled
+        if (cache) {
+            // Attempt to find the selected item in the search cache
+            mealQuery = await db.find('search_cache', selectedMealId);
+
+            if (!mealQuery) {
+                // If not found in the search cache, get the selected item from the API
+                mealQuery = await api.searchById(selectedMealId);
+
+                // Save an entry in search_cache.json
+                await db.create('search_cache', {
+                    id: selectedMealId,
+                    value: mealQuery
+                });
+            } else {
+                //get value(recipe) from cache
+                mealQuery = mealQuery.value;
             }
-            _prettyPrint(mealQuery.meals);
+        } else {
+            // If cache option is false, get the selected item from the API
+            mealQuery = await api.searchById(selectedMealId);
+
+            // Save an entry in search_cache.json
+            await db.create('search_cache', {
+                id: selectedMealId,
+                value: mealQuery
+            });
         }
-        else  {
-            const mealQuery = await api.searchById(variable);
-            if (mealQuery.meals === null){
-                throw new Error(`Sorry we don't have recipe with id ${variable}.`);
-            }
-            _prettyPrint(mealQuery.meals);
-        }
+        // Print the retrieved meal information
+        _prettyPrint(mealQuery.meals);
     } catch (error) {
         console.log(error.message);
     }
 }
-
-export async function randomRecipe() {
+// Gets the recipe from api using cache and save data in the search_history.json
+async function fetchRecipeFromAPI(type, variable) {
     try {
-        // get a random recipe
-        const mealQuery = await api.randomSearch();
-        _prettyPrint(mealQuery.meals);
+        let mealQuery;
+        if (type === 'name') {
+            mealQuery = await api.searchByName(variable);
+        } else if (type === 'firstLetter') {
+            mealQuery = await api.searchByFirstLetter(variable);
+        } else {
+            mealQuery = await api.searchById(variable);
+        }
+        //throw error if don't have recipe
+        if (mealQuery.meals === null) {
+            throw new Error(`Sorry, we don't have a recipe for ${variable}.`);
+        }
+        
+        await db.create('search_history', {
+            search: variable.charAt(0).toUpperCase() + variable.slice(1).toLowerCase(),
+            resultCount: mealQuery.meals.length
+        });
 
+        return mealQuery;
     } catch (error) {
         console.log(error.message);
     }
