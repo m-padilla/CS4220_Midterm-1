@@ -3,7 +3,7 @@ import axios from 'axios';
 import 'dotenv/config';
 
 // base is the most common part of the api url before the it is made dynamic
-const base = 'https://www.themealdb.com/api/json/v1/1';
+const base = `https://www.themealdb.com/api/json/v1/${process.env.API_KEY}`;
 
 // www.themealdb.com/api/json/v1/1/search.php?s=Arrabiata
 export async function searchByName(mealName) {

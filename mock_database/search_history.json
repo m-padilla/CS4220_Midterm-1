@@ -1,0 +1,14 @@
+[
+    {
+        "search": "rice",
+        "resultCount": 2
+    },
+    {
+        "search": "beef",
+        "resultCount": 20
+    },
+    {
+        "search": "chicken",
+        "resultCount": 25
+    }
+]
