@@ -200,3 +200,14 @@ async function fetchRecipeFromAPI(type, variable) {
   
     return mealQuery;
 }
+    
+export async function randomRecipe() {
+    try {
+        // get a random recipe
+        const mealQuery = await api.randomSearch();
+        _prettyPrint(mealQuery.meals);
+
+    } catch (error) {
+        console.log(error.message);
+    }
+}
