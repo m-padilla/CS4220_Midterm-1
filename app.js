@@ -81,13 +81,19 @@ async function _recipePrompt(meals) {
     });
 }
 
-export async function cookRecipe(type, variable, cache) {
+export async function cookRecipe(type, variable, cache = false) {
     try {
+
         let mealQuery;
         
         //search the recipe and save data in the search_history.json
         mealQuery = await fetchRecipeFromAPI(type, variable);
         
+        //throw error if don't have recipe 
+        if (mealQuery === null) {
+            throw new Error(`Sorry, we don't have a recipe for ${variable}.`);
+        }
+
         //Prompts the user to select an item from the search results.
         const selectedMealId = await _recipePrompt(mealQuery.meals);
         
@@ -106,7 +112,7 @@ export async function cookRecipe(type, variable, cache) {
                     value: mealQuery
                 });
             } else {
-                //get value(recipe) from cache
+                //get value(recipe) from cache if found
                 mealQuery = mealQuery.value;
             }
         } else {
@@ -137,9 +143,13 @@ async function fetchRecipeFromAPI(type, variable) {
         } else {
             mealQuery = await api.searchById(variable);
         }
-        //throw error if don't have recipe
+        //save resultcount as 0, because null has no length, and return null
         if (mealQuery.meals === null) {
-            throw new Error(`Sorry, we don't have a recipe for ${variable}.`);
+            await db.create('search_history', {
+                search: variable.charAt(0).toUpperCase() + variable.slice(1).toLowerCase(),
+                resultCount: 0
+            });
+            return null;
         }
         
         await db.create('search_history', {
