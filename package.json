@@ -1,7 +1,7 @@
 {
   "name": "cs4220_midterm",
   "version": "1.0.0",
-  "description": "a  CLI application interfacing with a web API to query data",
+  "description": "a  CLI application interfacing with with themealdb API to query meal data",
   "main": "cli.js",
   "type": "module",
   "scripts": {
