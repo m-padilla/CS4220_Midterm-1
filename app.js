@@ -81,9 +81,8 @@ async function _recipePrompt(meals) {
     });
 }
 
-export async function cookRecipe(type, variable, cache = false) {
+export async function cookRecipe(type, variable, cache) {
     try {
-        console.log(cache);
         let mealQuery;
         
         //search the recipe and save data in the search_history.json
@@ -107,7 +106,7 @@ export async function cookRecipe(type, variable, cache = false) {
                     value: mealQuery
                 });
             } else {
-                //get value(recipe) from cache if found
+                //get value(recipe) from cache
                 mealQuery = mealQuery.value;
             }
         } else {
@@ -126,6 +125,7 @@ export async function cookRecipe(type, variable, cache = false) {
         console.log(error.message);
     }
 }
+
 // Gets the recipe from api using cache and save data in the search_history.json
 async function fetchRecipeFromAPI(type, variable) {
     try {
