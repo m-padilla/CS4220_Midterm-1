@@ -1,14 +1,1 @@
-[
-    {
-        "search": "rice",
-        "resultCount": 2
-    },
-    {
-        "search": "beef",
-        "resultCount": 20
-    },
-    {
-        "search": "chicken",
-        "resultCount": 25
-    }
-]
+[{"search":"rice","resultCount":2},{"search":"beef","resultCount":20},{"search":"chicken","resultCount":25},{"search":"Pasta","resultCount":1},{"search":"S","resultCount":42},{"search":"52777","resultCount":1},{"search":"52777","resultCount":1},{"search":"52777","resultCount":1}]
