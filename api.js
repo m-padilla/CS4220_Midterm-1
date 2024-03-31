@@ -1,6 +1,5 @@
 // The file to interact with the deck of cards api
 import axios from 'axios';
-import 'dotenv/config';
 
 // base is the most common part of the api url before the it is made dynamic
 const base = 'https://www.themealdb.com/api/json/v1/1';
