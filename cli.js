@@ -38,7 +38,11 @@ yargs(hideBin(process.argv))
                 cookRecipe('name', args.variable, args.cache);
             } 
             else if (args.type === 'firstLetter') {
-                cookRecipe('firstLetter', args.variable, args.cache);
+                if (args.variable.length === 1) {
+                    cookRecipe('firstLetter', args.variable, args.cache);
+                } else {
+                    console.log('Please only enter 1 letter');
+                }
             }
             else{
                 cookRecipe('id', args.variable, args.cache);
