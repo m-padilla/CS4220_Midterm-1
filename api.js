@@ -1,4 +1,4 @@
-// The file to interact with the deck of cards api
+// The file to interact with the meal database api
 import axios from 'axios';
 
 // base is the most common part of the api url before the it is made dynamic
