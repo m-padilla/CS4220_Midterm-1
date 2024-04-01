@@ -34,18 +34,14 @@ yargs(hideBin(process.argv))
         },
         // handler function
         (args) => {
-            if (args.type === 'name') {
-                cookRecipe('name', args.variable, args.cache);
-            } 
-            else if (args.type === 'firstLetter') {
+            if (args.type === 'firstLetter') {
                 if (args.variable.length === 1) {
-                    cookRecipe('firstLetter', args.variable, args.cache);
+                    cookRecipe(args.type, args.variable, args.cache);
                 } else {
                     console.log('Please only enter 1 letter');
                 }
-            }
-            else{
-                cookRecipe('id', args.variable, args.cache);
+            } else {
+                cookRecipe(args.type, args.variable, args.cache);
             }
         }
     ).command(
